@@ -1,0 +1,104 @@
+12:46:44 **** Incremental Build of configuration Debug for project Quectel ****
+make -j12 all 
+arm-none-eabi-gcc "../Core/Src/app.c" -mcpu=cortex-m0plus -std=gnu11 -g3 -DDEBUG -DUSE_NUCLEO_64 -DUSE_HAL_DRIVER -DSTM32C071xx -c -I../Core/Inc -I../Drivers/STM32C0xx_HAL_Driver/Inc -I../Drivers/STM32C0xx_HAL_Driver/Inc/Legacy -I../Drivers/BSP/STM32C0xx_Nucleo -I../Drivers/CMSIS/Device/ST/STM32C0xx/Include -I../Drivers/CMSIS/Include -I../Middlewares/Third_Party/FreeRTOS/Source/include/ -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/ -I../Middlewares/Third_Party/CMSIS/RTOS2/Include/ -I../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0/ -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/app.d" -MT"Core/Src/app.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/app.o"
+arm-none-eabi-gcc "../Core/Src/app_freertos.c" -mcpu=cortex-m0plus -std=gnu11 -g3 -DDEBUG -DUSE_NUCLEO_64 -DUSE_HAL_DRIVER -DSTM32C071xx -c -I../Core/Inc -I../Drivers/STM32C0xx_HAL_Driver/Inc -I../Drivers/STM32C0xx_HAL_Driver/Inc/Legacy -I../Drivers/BSP/STM32C0xx_Nucleo -I../Drivers/CMSIS/Device/ST/STM32C0xx/Include -I../Drivers/CMSIS/Include -I../Middlewares/Third_Party/FreeRTOS/Source/include/ -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/ -I../Middlewares/Third_Party/CMSIS/RTOS2/Include/ -I../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0/ -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/app_freertos.d" -MT"Core/Src/app_freertos.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/app_freertos.o"
+arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m0plus -std=gnu11 -g3 -DDEBUG -DUSE_NUCLEO_64 -DUSE_HAL_DRIVER -DSTM32C071xx -c -I../Core/Inc -I../Drivers/STM32C0xx_HAL_Driver/Inc -I../Drivers/STM32C0xx_HAL_Driver/Inc/Legacy -I../Drivers/BSP/STM32C0xx_Nucleo -I../Drivers/CMSIS/Device/ST/STM32C0xx/Include -I../Drivers/CMSIS/Include -I../Middlewares/Third_Party/FreeRTOS/Source/include/ -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/ -I../Middlewares/Third_Party/CMSIS/RTOS2/Include/ -I../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0/ -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/main.o"
+arm-none-eabi-gcc "../Core/Src/stm32c0xx_hal_msp.c" -mcpu=cortex-m0plus -std=gnu11 -g3 -DDEBUG -DUSE_NUCLEO_64 -DUSE_HAL_DRIVER -DSTM32C071xx -c -I../Core/Inc -I../Drivers/STM32C0xx_HAL_Driver/Inc -I../Drivers/STM32C0xx_HAL_Driver/Inc/Legacy -I../Drivers/BSP/STM32C0xx_Nucleo -I../Drivers/CMSIS/Device/ST/STM32C0xx/Include -I../Drivers/CMSIS/Include -I../Middlewares/Third_Party/FreeRTOS/Source/include/ -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/ -I../Middlewares/Third_Party/CMSIS/RTOS2/Include/ -I../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0/ -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/stm32c0xx_hal_msp.d" -MT"Core/Src/stm32c0xx_hal_msp.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/stm32c0xx_hal_msp.o"
+arm-none-eabi-gcc "../Core/Src/stm32c0xx_it.c" -mcpu=cortex-m0plus -std=gnu11 -g3 -DDEBUG -DUSE_NUCLEO_64 -DUSE_HAL_DRIVER -DSTM32C071xx -c -I../Core/Inc -I../Drivers/STM32C0xx_HAL_Driver/Inc -I../Drivers/STM32C0xx_HAL_Driver/Inc/Legacy -I../Drivers/BSP/STM32C0xx_Nucleo -I../Drivers/CMSIS/Device/ST/STM32C0xx/Include -I../Drivers/CMSIS/Include -I../Middlewares/Third_Party/FreeRTOS/Source/include/ -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/ -I../Middlewares/Third_Party/CMSIS/RTOS2/Include/ -I../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0/ -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/stm32c0xx_it.d" -MT"Core/Src/stm32c0xx_it.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/stm32c0xx_it.o"
+arm-none-eabi-gcc -o "Quectel.elf" @"objects.list"   -mcpu=cortex-m0plus -T"D:\Strataroh_Git\25_SV09_Internship_Projects_FW\Asmita_04052026\Quectel\STM32C071RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Quectel.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: Quectel.elf
+ 
+arm-none-eabi-size  Quectel.elf 
+arm-none-eabi-objdump -h -S Quectel.elf  > "Quectel.list"
+   text	   data	    bss	    dec	    hex	filename
+  32984	    172	  14188	  47344	   b8f0	Quectel.elf
+Finished building: default.size.stdout
+ 
+Finished building: Quectel.list
+ 
+12:48:06 **** Incremental Build of configuration Debug for project Quectel ****
+make -j12 all 
+arm-none-eabi-size  Quectel.elf 
+   text	   data	    bss	    dec	    hex	filename
+  32984	    172	  14188	  47344	   b8f0	Quectel.elf
+Finished building: default.size.stdout
+ 
+12:56:59 **** Incremental Build of configuration Debug for project Quectel ****
+make -j12 all 
+arm-none-eabi-size  Quectel.elf 
+   text	   data	    bss	    dec	    hex	filename
+  32984	    172	  14188	  47344	   b8f0	Quectel.elf
+Finished building: default.size.stdout
+ 
+12:57:21 **** Incremental Build of configuration Debug for project Quectel ****
+make -j12 all 
+arm-none-eabi-size  Quectel.elf 
+   text	   data	    bss	    dec	    hex	filename
+  32984	    172	  14188	  47344	   b8f0	Quectel.elf
+Finished building: default.size.stdout
+ 
+13:03:22 **** Incremental Build of configuration Debug for project Quectel ****
+make -j12 all 
+arm-none-eabi-size  Quectel.elf 
+   text	   data	    bss	    dec	    hex	filename
+  32984	    172	  14188	  47344	   b8f0	Quectel.elf
+Finished building: default.size.stdout
+ 
+13:10:53 **** Incremental Build of configuration Debug for project Quectel ****
+make -j12 all 
+arm-none-eabi-gcc "../Core/Src/app.c" -mcpu=cortex-m0plus -std=gnu11 -g3 -DDEBUG -DUSE_NUCLEO_64 -DUSE_HAL_DRIVER -DSTM32C071xx -c -I../Core/Inc -I../Drivers/STM32C0xx_HAL_Driver/Inc -I../Drivers/STM32C0xx_HAL_Driver/Inc/Legacy -I../Drivers/BSP/STM32C0xx_Nucleo -I../Drivers/CMSIS/Device/ST/STM32C0xx/Include -I../Drivers/CMSIS/Include -I../Middlewares/Third_Party/FreeRTOS/Source/include/ -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/ -I../Middlewares/Third_Party/CMSIS/RTOS2/Include/ -I../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0/ -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/app.d" -MT"Core/Src/app.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/app.o"
+arm-none-eabi-gcc -o "Quectel.elf" @"objects.list"   -mcpu=cortex-m0plus -T"D:\Strataroh_Git\25_SV09_Internship_Projects_FW\Asmita_04052026\Quectel\STM32C071RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Quectel.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: Quectel.elf
+ 
+arm-none-eabi-size  Quectel.elf 
+arm-none-eabi-objdump -h -S Quectel.elf  > "Quectel.list"
+   text	   data	    bss	    dec	    hex	filename
+  32888	    136	  14192	  47216	   b870	Quectel.elf
+Finished building: default.size.stdout
+ 
+Finished building: Quectel.list
+ 
+13:40:13 **** Incremental Build of configuration Debug for project Quectel ****
+make -j12 all 
+arm-none-eabi-gcc "../Core/Src/app.c" -mcpu=cortex-m0plus -std=gnu11 -g3 -DDEBUG -DUSE_NUCLEO_64 -DUSE_HAL_DRIVER -DSTM32C071xx -c -I../Core/Inc -I../Drivers/STM32C0xx_HAL_Driver/Inc -I../Drivers/STM32C0xx_HAL_Driver/Inc/Legacy -I../Drivers/BSP/STM32C0xx_Nucleo -I../Drivers/CMSIS/Device/ST/STM32C0xx/Include -I../Drivers/CMSIS/Include -I../Middlewares/Third_Party/FreeRTOS/Source/include/ -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/ -I../Middlewares/Third_Party/CMSIS/RTOS2/Include/ -I../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0/ -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/app.d" -MT"Core/Src/app.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/app.o"
+arm-none-eabi-gcc "../Core/Src/app_freertos.c" -mcpu=cortex-m0plus -std=gnu11 -g3 -DDEBUG -DUSE_NUCLEO_64 -DUSE_HAL_DRIVER -DSTM32C071xx -c -I../Core/Inc -I../Drivers/STM32C0xx_HAL_Driver/Inc -I../Drivers/STM32C0xx_HAL_Driver/Inc/Legacy -I../Drivers/BSP/STM32C0xx_Nucleo -I../Drivers/CMSIS/Device/ST/STM32C0xx/Include -I../Drivers/CMSIS/Include -I../Middlewares/Third_Party/FreeRTOS/Source/include/ -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/ -I../Middlewares/Third_Party/CMSIS/RTOS2/Include/ -I../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0/ -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/app_freertos.d" -MT"Core/Src/app_freertos.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/app_freertos.o"
+arm-none-eabi-gcc -o "Quectel.elf" @"objects.list"   -mcpu=cortex-m0plus -T"D:\Strataroh_Git\25_SV09_Internship_Projects_FW\Asmita_04052026\Quectel\STM32C071RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Quectel.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: Quectel.elf
+ 
+arm-none-eabi-size  Quectel.elf 
+arm-none-eabi-objdump -h -S Quectel.elf  > "Quectel.list"
+   text	   data	    bss	    dec	    hex	filename
+  32984	    172	  14188	  47344	   b8f0	Quectel.elf
+Finished building: default.size.stdout
+ 
+Finished building: Quectel.list
+ 
+13:55:44 **** Incremental Build of configuration Debug for project Quectel ****
+make -j12 all 
+arm-none-eabi-gcc "../Core/Src/app.c" -mcpu=cortex-m0plus -std=gnu11 -g3 -DDEBUG -DUSE_NUCLEO_64 -DUSE_HAL_DRIVER -DSTM32C071xx -c -I../Core/Inc -I../Drivers/STM32C0xx_HAL_Driver/Inc -I../Drivers/STM32C0xx_HAL_Driver/Inc/Legacy -I../Drivers/BSP/STM32C0xx_Nucleo -I../Drivers/CMSIS/Device/ST/STM32C0xx/Include -I../Drivers/CMSIS/Include -I../Middlewares/Third_Party/FreeRTOS/Source/include/ -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/ -I../Middlewares/Third_Party/CMSIS/RTOS2/Include/ -I../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0/ -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/app.d" -MT"Core/Src/app.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/app.o"
+arm-none-eabi-gcc "../Core/Src/app_freertos.c" -mcpu=cortex-m0plus -std=gnu11 -g3 -DDEBUG -DUSE_NUCLEO_64 -DUSE_HAL_DRIVER -DSTM32C071xx -c -I../Core/Inc -I../Drivers/STM32C0xx_HAL_Driver/Inc -I../Drivers/STM32C0xx_HAL_Driver/Inc/Legacy -I../Drivers/BSP/STM32C0xx_Nucleo -I../Drivers/CMSIS/Device/ST/STM32C0xx/Include -I../Drivers/CMSIS/Include -I../Middlewares/Third_Party/FreeRTOS/Source/include/ -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/ -I../Middlewares/Third_Party/CMSIS/RTOS2/Include/ -I../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0/ -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/app_freertos.d" -MT"Core/Src/app_freertos.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/app_freertos.o"
+arm-none-eabi-gcc -o "Quectel.elf" @"objects.list"   -mcpu=cortex-m0plus -T"D:\Strataroh_Git\25_SV09_Internship_Projects_FW\Asmita_04052026\Quectel\STM32C071RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Quectel.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: Quectel.elf
+ 
+arm-none-eabi-size  Quectel.elf 
+arm-none-eabi-objdump -h -S Quectel.elf  > "Quectel.list"
+   text	   data	    bss	    dec	    hex	filename
+  32968	    136	  14208	  47312	   b8d0	Quectel.elf
+Finished building: default.size.stdout
+ 
+Finished building: Quectel.list
+ 
+14:05:17 **** Incremental Build of configuration Debug for project Quectel ****
+make -j12 all 
+arm-none-eabi-gcc "../Core/Src/app.c" -mcpu=cortex-m0plus -std=gnu11 -g3 -DDEBUG -DUSE_NUCLEO_64 -DUSE_HAL_DRIVER -DSTM32C071xx -c -I../Core/Inc -I../Drivers/STM32C0xx_HAL_Driver/Inc -I../Drivers/STM32C0xx_HAL_Driver/Inc/Legacy -I../Drivers/BSP/STM32C0xx_Nucleo -I../Drivers/CMSIS/Device/ST/STM32C0xx/Include -I../Drivers/CMSIS/Include -I../Middlewares/Third_Party/FreeRTOS/Source/include/ -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/ -I../Middlewares/Third_Party/CMSIS/RTOS2/Include/ -I../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0/ -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/app.d" -MT"Core/Src/app.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/app.o"
+arm-none-eabi-gcc -o "Quectel.elf" @"objects.list"   -mcpu=cortex-m0plus -T"D:\Strataroh_Git\25_SV09_Internship_Projects_FW\Asmita_04052026\Quectel\STM32C071RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Quectel.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: Quectel.elf
+ 
+arm-none-eabi-size  Quectel.elf 
+arm-none-eabi-objdump -h -S Quectel.elf  > "Quectel.list"
+   text	   data	    bss	    dec	    hex	filename
+  33064	    172	  14204	  47440	   b950	Quectel.elf
+Finished building: default.size.stdout
+ 
+Finished building: Quectel.list
+ 

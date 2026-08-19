@@ -1,0 +1,7 @@
+../Core/Src/app.c:91:6:start_module	2
+../Core/Src/app.c:113:13:modem_start_rx_it	1
+../Core/Src/app.c:126:6:HAL_UARTEx_RxEventCallback	4
+../Core/Src/app.c:158:6:HAL_UART_ErrorCallback	2
+../Core/Src/app.c:169:13:clear_response	1
+../Core/Src/app.c:180:13:modem_send_command_and_wait	6
+../Core/Src/app.c:245:6:modem_task	5

@@ -1,0 +1,299 @@
+#include "app.h"
+#include <string.h>
+#include <stdio.h>
+
+/* UART1 handle created in main.c */
+extern UART_HandleTypeDef huart1;
+
+/* ================= DEBUG TAGS ================= */
+
+#define APP_TAG                  "[APP] "
+#define TX_TAG                   "[TX] "
+#define RX_TAG                   "[RX] "
+#define ERROR_TAG                "[ERROR] "
+
+/* ================= RETRY AND DELAY SETTINGS ================= */
+
+#define AT_COMMAND_RETRIES       3
+#define UART_TX_TIMEOUT_MS       1000
+#define UART_RX_TIMEOUT_MS       200
+#define AT_COMMAND_DELAY_MS      2000
+#define MODULE_BOOT_DELAY_MS     5000
+#define ERROR_DELAY_MS           1000
+
+/* ================= RX SETTINGS ================= */
+
+#define RX_LINE_BUFFER_SIZE      256
+
+/* ================= TX TASK DETAILS ================= */
+
+#define TX_TASK_NAME             "tx_task"
+#define TX_TASK_STACK_SIZE       (512 * 4)
+#define TX_TASK_PRIORITY         osPriorityNormal
+
+/* ================= RX TASK DETAILS ================= */
+
+#define RX_TASK_NAME             "rx_task"
+#define RX_TASK_STACK_SIZE       (512 * 4)
+#define RX_TASK_PRIORITY         osPriorityAboveNormal
+
+/* ================= TASK HANDLES ================= */
+
+static osThreadId_t tx_task_handle = NULL;
+static osThreadId_t rx_task_handle = NULL;
+
+/* ================= TASK ATTRIBUTES ================= */
+
+static const osThreadAttr_t tx_task_attributes =
+{
+    .name = TX_TASK_NAME,
+    .priority = TX_TASK_PRIORITY,
+    .stack_size = TX_TASK_STACK_SIZE
+};
+
+static const osThreadAttr_t rx_task_attributes =
+{
+    .name = RX_TASK_NAME,
+    .priority = RX_TASK_PRIORITY,
+    .stack_size = RX_TASK_STACK_SIZE
+};
+
+/* ================= TASK STATES ================= */
+
+static task_state_t tx_task_state = TASK_STATE_IDLE;
+static task_state_t rx_task_state = TASK_STATE_IDLE;
+
+/* ================= AT COMMAND ARRAY ================= */
+
+static const char *at_commands[] =
+{
+    "ATE0\r\n",
+    "AT\r\n",
+    "ATV1\r\n",
+    "AT+CMEE=2\r\n",
+    "AT+IPR?\r\n",
+    "ATI\r\n",
+    "AT+GSN=1\r\n",
+    "AT+CPIN?\r\n",
+    "AT+CIMI\r\n",
+    "AT+QCCID\r\n",
+    "AT+CSQ\r\n",
+    "AT+CREG?\r\n",
+    "AT+CGREG?\r\n",
+    "AT+COPS?\r\n"
+};
+
+#define TOTAL_AT_COMMANDS  (sizeof(at_commands) / sizeof(at_commands[0]))
+
+/* ================= GET TASK STATE FUNCTIONS ================= */
+
+task_state_t get_tx_task_state(void)
+{
+    return tx_task_state;
+}
+
+task_state_t get_rx_task_state(void)
+{
+    return rx_task_state;
+}
+
+/* ================= UART TX WITH RETRY ================= */
+
+static HAL_StatusTypeDef uart_tx_with_retry(const char *cmd)
+{
+    HAL_StatusTypeDef status = HAL_ERROR;
+
+    for (uint8_t retry = 0; retry < AT_COMMAND_RETRIES; retry++)
+    {
+        status = HAL_UART_Transmit(&huart1,
+                                   (uint8_t *)cmd,
+                                   strlen(cmd),
+                                   UART_TX_TIMEOUT_MS);
+
+        if (status == HAL_OK)
+        {
+            printf(TX_TAG "Command sent: %s", cmd);
+            return HAL_OK;
+        }
+
+        printf(ERROR_TAG "UART TX failed. Retry %d/%d\r\n",
+               retry + 1,
+               AT_COMMAND_RETRIES);
+
+        osDelay(ERROR_DELAY_MS);
+    }
+
+    return HAL_ERROR;
+}
+
+/* ================= START MODULE ================= */
+
+void start_module(void)
+{
+    printf(APP_TAG "Starting Quectel module tasks...\r\n");
+
+    tx_task_state = TASK_STATE_IDLE;
+    rx_task_state = TASK_STATE_IDLE;
+
+    tx_task_handle = osThreadNew(tx_task, NULL, &tx_task_attributes);
+
+    if (tx_task_handle != NULL)
+    {
+        printf(APP_TAG "tx_task created successfully\r\n");
+    }
+    else
+    {
+        tx_task_state = TASK_STATE_ERROR;
+        printf(ERROR_TAG "tx_task creation failed\r\n");
+    }
+
+    rx_task_handle = osThreadNew(rx_task, NULL, &rx_task_attributes);
+
+    if (rx_task_handle != NULL)
+    {
+        printf(APP_TAG "rx_task created successfully\r\n");
+    }
+    else
+    {
+        rx_task_state = TASK_STATE_ERROR;
+        printf(ERROR_TAG "rx_task creation failed\r\n");
+    }
+}
+
+/* ================= TX TASK ================= */
+
+void tx_task(void *argument)
+{
+    uint8_t command_index = 0;
+
+    printf(TX_TAG "Task started\r\n");
+
+    tx_task_state = TASK_STATE_RUNNING;
+
+    printf(APP_TAG "Waiting for Quectel module boot...\r\n");
+    osDelay(MODULE_BOOT_DELAY_MS);
+
+    while (1)
+    {
+        if (command_index >= TOTAL_AT_COMMANDS)
+        {
+            command_index = 0;
+            printf(TX_TAG "All AT commands sent. Restarting list...\r\n");
+            osDelay(5000);
+        }
+
+        if (uart_tx_with_retry(at_commands[command_index]) == HAL_OK)
+        {
+            command_index++;
+        }
+        else
+        {
+            tx_task_state = TASK_STATE_ERROR;
+            printf(ERROR_TAG "Command failed after retries\r\n");
+
+            osDelay(ERROR_DELAY_MS);
+
+            tx_task_state = TASK_STATE_RUNNING;
+        }
+
+        osDelay(AT_COMMAND_DELAY_MS);
+    }
+}
+
+/* ================= RX TASK ================= */
+
+void rx_task(void *argument)
+{
+    uint8_t rx_byte;
+    char rx_line[RX_LINE_BUFFER_SIZE];
+    uint16_t rx_index = 0;
+
+    printf(RX_TAG "Task started\r\n");
+
+    rx_task_state = TASK_STATE_RUNNING;
+
+    memset(rx_line, 0, RX_LINE_BUFFER_SIZE);
+
+    while (1)
+    {
+        HAL_StatusTypeDef status;
+
+        status = HAL_UART_Receive(&huart1,
+                                  &rx_byte,
+                                  1,
+                                  UART_RX_TIMEOUT_MS);
+
+        if (status == HAL_OK)
+        {
+            if (rx_byte == '\r')
+            {
+                /* Ignore carriage return */
+            }
+            else if (rx_byte == '\n')
+            {
+                if (rx_index > 0)
+                {
+                    rx_line[rx_index] = '\0';
+
+                    printf(RX_TAG "%s\r\n", rx_line);
+
+                    if (strstr(rx_line, "OK") != NULL)
+                    {
+                        printf(RX_TAG "OK received\r\n");
+                    }
+                    else if (strstr(rx_line, "ERROR") != NULL)
+                    {
+                        printf(ERROR_TAG "ERROR received from Quectel\r\n");
+                    }
+                    else if (strstr(rx_line, "+CPIN:") != NULL)
+                    {
+                        printf(RX_TAG "SIM status received\r\n");
+                    }
+                    else if (strstr(rx_line, "+CSQ:") != NULL)
+                    {
+                        printf(RX_TAG "Signal quality received\r\n");
+                    }
+                    else if (strstr(rx_line, "+CREG:") != NULL)
+                    {
+                        printf(RX_TAG "Network registration received\r\n");
+                    }
+                    else if (strstr(rx_line, "+CGREG:") != NULL)
+                    {
+                        printf(RX_TAG "GPRS registration received\r\n");
+                    }
+
+                    rx_index = 0;
+                    memset(rx_line, 0, RX_LINE_BUFFER_SIZE);
+                }
+            }
+            else
+            {
+                if (rx_index < RX_LINE_BUFFER_SIZE - 1)
+                {
+                    rx_line[rx_index++] = rx_byte;
+                }
+                else
+                {
+                    rx_index = 0;
+                    memset(rx_line, 0, RX_LINE_BUFFER_SIZE);
+
+                    rx_task_state = TASK_STATE_ERROR;
+                    printf(ERROR_TAG "RX buffer overflow\r\n");
+
+                    osDelay(ERROR_DELAY_MS);
+
+                    rx_task_state = TASK_STATE_RUNNING;
+                }
+            }
+        }
+        else
+        {
+            /*
+             * Timeout is normal here.
+             * It simply means no data came from Quectel during this small time.
+             * So do not print error continuously.
+             */
+            osDelay(10);
+        }
+    }
+}

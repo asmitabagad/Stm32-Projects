@@ -1,0 +1,8 @@
+g_rx_done
+g_rx_size
+g_rx_count
+g_tx_count
+g_error_count
+g_timeout_count
+g_modem_state
+g_rx_debug

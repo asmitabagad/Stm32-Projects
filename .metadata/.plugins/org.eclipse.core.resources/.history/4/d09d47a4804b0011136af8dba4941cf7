@@ -1,0 +1,291 @@
+#include "app.h"
+#include <string.h>
+#include <stdio.h>
+#include <stdbool.h>
+
+/* UART1 handle from main.c */
+extern UART_HandleTypeDef huart1;
+
+/* ================= DEBUG TAGS ================= */
+
+#define APP_TAG                 "[APP] "
+#define MODEM_TAG               "[MODEM] "
+#define TX_TAG                  "[TX] "
+#define RX_TAG                  "[RX] "
+#define ERROR_TAG               "[ERROR] "
+
+/* ================= SETTINGS ================= */
+
+#define MODEM_TASK_NAME         "modem_task"
+#define MODEM_TASK_STACK_SIZE   (1024 * 4)
+#define MODEM_TASK_PRIORITY     osPriorityNormal
+
+#define RX_BUFFER_SIZE          256
+#define RESPONSE_BUFFER_SIZE    256
+
+#define AT_TIMEOUT_MS           3000
+#define AT_RETRY_COUNT          3
+#define COMMAND_DELAY_MS        1000
+#define MODULE_BOOT_DELAY_MS    5000
+
+/* ================= TASK HANDLE ================= */
+
+static osThreadId_t modem_task_handle = NULL;
+
+static const osThreadAttr_t modem_task_attributes =
+{
+    .name = MODEM_TASK_NAME,
+    .priority = MODEM_TASK_PRIORITY,
+    .stack_size = MODEM_TASK_STACK_SIZE
+};
+
+/* ================= LIVE EXPRESSION VARIABLES ================= */
+
+volatile uint8_t  g_rx_done = 0;
+volatile uint16_t g_rx_size = 0;
+volatile uint32_t g_rx_count = 0;
+volatile uint32_t g_tx_count = 0;
+volatile uint32_t g_ok_count = 0;
+volatile uint32_t g_error_count = 0;
+volatile uint32_t g_timeout_count = 0;
+
+volatile uint32_t g_callback_count = 0;
+volatile uint8_t  g_last_rx_byte = 0;
+volatile uint32_t g_byte_rx_count = 0;
+volatile uint32_t g_uart_error_code = 0;
+
+volatile modem_state_t g_modem_state = MODEM_STATE_IDLE;
+
+volatile char g_rx_debug[RESPONSE_BUFFER_SIZE];
+
+/* ================= INTERNAL BUFFERS ================= */
+
+static uint8_t uart_rx_buffer[RX_BUFFER_SIZE];
+static char response_buffer[RESPONSE_BUFFER_SIZE];
+
+/* ================= AT COMMANDS ================= */
+
+static const char *at_commands[] =
+{
+    "AT\r\n",
+    "ATE0\r\n",
+    "ATV1\r\n",
+    "AT+CMEE=2\r\n",
+    "ATI\r\n",
+    "AT+CPIN?\r\n",
+    "AT+CSQ\r\n",
+    "AT+CREG?\r\n",
+    "AT+CGREG?\r\n",
+    "AT+COPS?\r\n"
+};
+
+#define TOTAL_AT_COMMANDS  (sizeof(at_commands) / sizeof(at_commands[0]))
+
+/* ================= PRIVATE FUNCTION DECLARATIONS ================= */
+
+static void modem_start_rx_it(void);
+static void clear_response(void);
+static bool modem_send_command_and_wait(const char *cmd, uint32_t timeout_ms);
+
+/* ================= START MODULE ================= */
+
+void start_module(void)
+{
+    printf(APP_TAG "Starting modem module\r\n");
+
+    clear_response();
+
+    modem_start_rx_it();
+
+    modem_task_handle = osThreadNew(modem_task, NULL, &modem_task_attributes);
+
+    if (modem_task_handle != NULL)
+    {
+        printf(APP_TAG "modem_task created successfully\r\n");
+    }
+    else
+    {
+        printf(ERROR_TAG "modem_task creation failed\r\n");
+    }
+}
+
+/* ================= START UART RECEIVE TO IDLE INTERRUPT ================= */
+
+static void modem_start_rx_it(void)
+{
+    memset(uart_rx_buffer, 0, RX_BUFFER_SIZE);
+
+    HAL_UARTEx_ReceiveToIdle_IT(&huart1,
+                                uart_rx_buffer,
+                                RX_BUFFER_SIZE);
+
+    __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
+}
+
+/* ================= UART RX CALLBACK ================= */
+
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
+{
+    if (huart->Instance == USART1)
+    {
+        g_callback_count++;
+
+        if (Size > 0)
+        {
+            if (Size >= RESPONSE_BUFFER_SIZE)
+            {
+                Size = RESPONSE_BUFFER_SIZE - 1;
+            }
+
+            memset(response_buffer, 0, RESPONSE_BUFFER_SIZE);
+            memcpy(response_buffer, uart_rx_buffer, Size);
+            response_buffer[Size] = '\0';
+
+            memset((char *)g_rx_debug, 0, RESPONSE_BUFFER_SIZE);
+            memcpy((char *)g_rx_debug, response_buffer, Size);
+
+            g_rx_size = Size;
+            g_rx_count++;
+            g_rx_done = 1;
+
+            g_last_rx_byte = uart_rx_buffer[0];
+            g_byte_rx_count += Size;
+        }
+
+        modem_start_rx_it();
+    }
+}
+
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
+{
+    if (huart->Instance == USART1)
+    {
+        g_uart_error_code = huart->ErrorCode;
+
+        modem_start_rx_it();
+    }
+}
+/* ================= CLEAR RESPONSE ================= */
+
+static void clear_response(void)
+{
+    memset(response_buffer, 0, RESPONSE_BUFFER_SIZE);
+    memset((char *)g_rx_debug, 0, RESPONSE_BUFFER_SIZE);
+
+    g_rx_done = 0;
+    g_rx_size = 0;
+}
+
+/* ================= SEND COMMAND AND WAIT RESPONSE ================= */
+
+static bool modem_send_command_and_wait(const char *cmd, uint32_t timeout_ms)
+{
+    uint32_t start_tick;
+
+    clear_response();
+
+    g_modem_state = MODEM_STATE_SEND_COMMAND;
+
+    printf(TX_TAG "%s", cmd);
+
+    if (HAL_UART_Transmit(&huart1,
+                          (uint8_t *)cmd,
+                          strlen(cmd),
+                          1000) != HAL_OK)
+    {
+        printf(ERROR_TAG "UART transmit failed\r\n");
+        return false;
+    }
+
+    g_tx_count++;
+
+    g_modem_state = MODEM_STATE_WAIT_RESPONSE;
+    start_tick = HAL_GetTick();
+
+    while ((HAL_GetTick() - start_tick) < timeout_ms)
+    {
+        if (g_rx_done)
+        {
+            printf(RX_TAG "%s\r\n", response_buffer);
+
+            if (strstr(response_buffer, "OK") != NULL)
+            {
+                g_ok_count++;
+                g_modem_state = MODEM_STATE_RESPONSE_OK;
+                return true;
+            }
+
+            if (strstr(response_buffer, "ERROR") != NULL)
+            {
+                g_error_count++;
+                g_modem_state = MODEM_STATE_RESPONSE_ERROR;
+                return false;
+            }
+
+            /*
+             * Some responses may arrive first without OK.
+             * Example: +CSQ: 18,99 then OK may come separately.
+             * So keep waiting.
+             */
+            g_rx_done = 0;
+        }
+
+        osDelay(10);
+    }
+
+    g_timeout_count++;
+    g_modem_state = MODEM_STATE_TIMEOUT;
+
+    printf(ERROR_TAG "Timeout waiting for response\r\n");
+
+    return false;
+}
+
+/* ================= MODEM TASK ================= */
+
+void modem_task(void *argument)
+{
+    uint8_t command_index = 0;
+    uint8_t retry = 0;
+
+    printf(MODEM_TAG "Task started\r\n");
+    printf(MODEM_TAG "Waiting for module boot\r\n");
+
+    osDelay(MODULE_BOOT_DELAY_MS);
+
+    while (1)
+    {
+        retry = 0;
+
+        while (retry < AT_RETRY_COUNT)
+        {
+            if (modem_send_command_and_wait(at_commands[command_index], AT_TIMEOUT_MS))
+            {
+                retry = 0;
+                command_index++;
+                break;
+            }
+            else
+            {
+                retry++;
+                printf(ERROR_TAG "Retry %d/%d\r\n", retry, AT_RETRY_COUNT);
+                osDelay(1000);
+            }
+        }
+
+        if (retry >= AT_RETRY_COUNT)
+        {
+            printf(ERROR_TAG "Command failed after all retries\r\n");
+            osDelay(3000);
+        }
+
+        if (command_index >= TOTAL_AT_COMMANDS)
+        {
+            command_index = 0;
+            printf(MODEM_TAG "All commands completed. Restarting list\r\n");
+            osDelay(5000);
+        }
+
+        osDelay(COMMAND_DELAY_MS);
+    }
+}

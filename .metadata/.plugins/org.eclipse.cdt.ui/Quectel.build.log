@@ -1,0 +1,17 @@
+14:05:17 **** Incremental Build of configuration Debug for project Quectel ****
+make -j12 all 
+arm-none-eabi-gcc "../Core/Src/app.c" -mcpu=cortex-m0plus -std=gnu11 -g3 -DDEBUG -DUSE_NUCLEO_64 -DUSE_HAL_DRIVER -DSTM32C071xx -c -I../Core/Inc -I../Drivers/STM32C0xx_HAL_Driver/Inc -I../Drivers/STM32C0xx_HAL_Driver/Inc/Legacy -I../Drivers/BSP/STM32C0xx_Nucleo -I../Drivers/CMSIS/Device/ST/STM32C0xx/Include -I../Drivers/CMSIS/Include -I../Middlewares/Third_Party/FreeRTOS/Source/include/ -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/ -I../Middlewares/Third_Party/CMSIS/RTOS2/Include/ -I../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0/ -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/app.d" -MT"Core/Src/app.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/app.o"
+arm-none-eabi-gcc -o "Quectel.elf" @"objects.list"   -mcpu=cortex-m0plus -T"D:\Strataroh_Git\25_SV09_Internship_Projects_FW\Asmita_04052026\Quectel\STM32C071RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Quectel.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: Quectel.elf
+ 
+arm-none-eabi-size  Quectel.elf 
+arm-none-eabi-objdump -h -S Quectel.elf  > "Quectel.list"
+   text	   data	    bss	    dec	    hex	filename
+  33064	    172	  14204	  47440	   b950	Quectel.elf
+Finished building: default.size.stdout
+ 
+Finished building: Quectel.list
+ 
+
+14:05:19 Build Finished. 0 errors, 0 warnings. (took 1s.985ms)
+

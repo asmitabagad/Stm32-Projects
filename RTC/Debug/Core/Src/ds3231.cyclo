@@ -1,0 +1,6 @@
+../Core/Src/ds3231.c:5:16:Dec_To_BCD	1
+../Core/Src/ds3231.c:10:16:BCD_To_Dec	1
+../Core/Src/ds3231.c:15:22:DS3231_Init	1
+../Core/Src/ds3231.c:22:22:DS3231_Detect	3
+../Core/Src/ds3231.c:40:22:DS3231_SetTime	3
+../Core/Src/ds3231.c:71:22:DS3231_GetTime	3

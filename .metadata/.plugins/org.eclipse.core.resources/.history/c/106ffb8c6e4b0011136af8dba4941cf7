@@ -1,0 +1,168 @@
+/*
+ * app.c
+ *
+ *  Created on: May 8, 2026
+ *      Author: Asmita Milind Bagad
+ */
+
+#include "app.h"
+#include <string.h>
+#include <stdio.h>
+/* Using UART1 from main.c */
+extern UART_HandleTypeDef huart1;
+
+/* ================= DEBUG TAGS ================= */
+
+#define APP_TAG        "[APP] "
+#define TX_TAG         "[TX] "
+#define ERROR_TAG      "[ERROR] "
+
+/* ================= RETRIES AND DELAYS ================= */
+
+#define AT_COMMAND_RETRIES       3
+#define UART_TX_TIMEOUT_MS       1000
+#define AT_COMMAND_DELAY_MS      1000
+#define MODULE_BOOT_DELAY_MS     3000
+#define TASK_ERROR_DELAY_MS      2000
+
+/* ================= TASK DETAILS ================= */
+
+#define TX_TASK_NAME             "tx_task"
+#define TX_TASK_STACK_SIZE       (512 * 4)
+#define TX_TASK_PRIORITY         osPriorityNormal
+
+/* ================= TASK HANDLE ================= */
+
+static osThreadId_t tx_task_handle = NULL;
+
+/* ================= TASK ATTRIBUTES ================= */
+
+static const osThreadAttr_t tx_task_attributes =
+{
+    .name = TX_TASK_NAME,
+    .priority = TX_TASK_PRIORITY,
+    .stack_size = TX_TASK_STACK_SIZE
+};
+
+/* ================= TASK STATE ================= */
+
+static task_state_t tx_task_state = TASK_STATE_IDLE;
+
+/* ================= AT COMMAND ARRAY ================= */
+
+static char *at_commands[] =
+{
+    "ATE0\r\n",
+    "AT\r\n",
+    "ATV1\r\n",
+    "AT+CMEE=2\r\n",
+    "AT+IPR?\r\n",
+    "ATI\r\n",
+    "AT+GSN=1\r\n",
+    "AT+CPIN?\r\n",
+    "AT+CIMI\r\n",
+    "AT+QCCID\r\n",
+    "AT+CSQ\r\n",
+    "AT+CREG?\r\n",
+    "AT+CGREG?\r\n",
+    "AT+COPS?\r\n"
+};
+
+#define TOTAL_AT_COMMANDS   (sizeof(at_commands) / sizeof(at_commands[0]))
+
+/* ================= GET TASK STATE ================= */
+
+task_state_t get_tx_task_state(void)
+{
+    return tx_task_state;
+}
+
+/* ================= START MODULE ================= */
+
+void start_module(void)
+{
+    printf(APP_TAG "start_module called\r\n");
+
+    tx_task_state = TASK_STATE_IDLE;
+
+    tx_task_handle = osThreadNew(tx_task, NULL, &tx_task_attributes);
+
+    if (tx_task_handle != NULL)
+    {
+        printf(APP_TAG "tx_task created successfully\r\n");
+    }
+    else
+    {
+        tx_task_state = TASK_STATE_ERROR;
+        printf(ERROR_TAG "tx_task creation failed\r\n");
+    }
+}
+
+/* ================= UART TRANSMIT WITH RETRIES ================= */
+
+static HAL_StatusTypeDef uart_tx_with_retry(char *cmd)
+{
+    HAL_StatusTypeDef status = HAL_ERROR;
+
+    for (uint8_t retry = 0; retry < AT_COMMAND_RETRIES; retry++)
+    {
+        status = HAL_UART_Transmit(&huart1,
+                                   (uint8_t *)cmd,
+                                   strlen(cmd),
+                                   UART_TX_TIMEOUT_MS);
+
+        if (status == HAL_OK)
+        {
+            printf(TX_TAG "Command sent: %s", cmd);
+            return HAL_OK;
+        }
+
+        printf(ERROR_TAG "UART transmit failed. Retry %d/%d\r\n",
+               retry + 1,
+               AT_COMMAND_RETRIES);
+
+        osDelay(TASK_ERROR_DELAY_MS);
+    }
+
+    return HAL_ERROR;
+}
+
+/* ================= TX TASK ================= */
+
+void tx_task(void *argument)
+{
+    uint8_t i = 0;
+
+    printf(TX_TAG "Task started\r\n");
+
+    tx_task_state = TASK_STATE_RUNNING;
+
+    osDelay(MODULE_BOOT_DELAY_MS);
+
+    while (1)
+    {
+        if (i >= TOTAL_AT_COMMANDS)
+        {
+            i = 0;
+            printf(TX_TAG "All AT commands sent. Restarting list...\r\n");
+            osDelay(3000);
+        }
+
+        if (uart_tx_with_retry(at_commands[i]) == HAL_OK)
+        {
+            i++;
+        }
+        else
+        {
+            tx_task_state = TASK_STATE_ERROR;
+
+            printf(ERROR_TAG "Command failed after all retries\r\n");
+
+            osDelay(TASK_ERROR_DELAY_MS);
+
+            tx_task_state = TASK_STATE_RUNNING;
+        }
+
+        osDelay(AT_COMMAND_DELAY_MS);
+    }
+}

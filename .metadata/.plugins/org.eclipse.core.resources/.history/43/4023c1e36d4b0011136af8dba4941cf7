@@ -1,0 +1,33 @@
+/*
+ * app.h
+ *
+ *  Created on: May 8, 2026
+ *      Author: Asmita Milind Bagad
+ */
+
+#ifndef INC_APP_H_
+#define INC_APP_H_
+#include "main.h"
+#include "cmsis_os2.h"
+#include <stdint.h>
+#include <stdio.h>
+
+/* Task state enum */
+typedef enum
+{
+    TASK_STATE_IDLE = 0,
+    TASK_STATE_RUNNING,
+    TASK_STATE_STOPPED,
+    TASK_STATE_ERROR
+} task_state_t;
+
+/* Main module start function */
+void start_module(void);
+
+/* Task function */
+void tx_task(void *argument);
+
+/* Get task state */
+task_state_t get_tx_task_state(void);
+
+#endif /* INC_APP_H_ */

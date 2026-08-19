@@ -1,0 +1,6 @@
+1777982111656	Delete resource 'ADC'
+1778051118380	Delete resource 'RTC/Core/Inc/ds3231'
+1778068870979	Delete resource 'Pulse counting'
+1778225649304	Delete resource 'FREERTOS-2_led_toggle/Core/Src/led.h'
+1778237567398	Rename resource 'freeRTOS-sema_mutex'
+1778240720855	Delete resource 'freeRTOS-quectel'

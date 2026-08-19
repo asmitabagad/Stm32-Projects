@@ -1,0 +1,80 @@
+/*
+ * ds3231.h
+ *
+ *  Created on: May 6, 2026
+ *      Author: Asmita Milind Bagad
+ */
+
+#ifndef INC_DS3231_H_
+#define INC_DS3231_H_
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "main.h"
+#include <stdint.h>
+
+#define DS3231_I2C_ADDRESS      (0x68 << 1)
+
+/*
+ * DS3231 register addresses
+ */
+#define DS3231_REG_SECONDS      0x00
+#define DS3231_REG_MINUTES      0x01
+#define DS3231_REG_HOURS        0x02
+#define DS3231_REG_DAY          0x03
+#define DS3231_REG_DATE         0x04
+#define DS3231_REG_MONTH        0x05
+#define DS3231_REG_YEAR         0x06
+#define DS3231_REG_CONTROL      0x0E
+#define DS3231_REG_STATUS       0x0F
+#define DS3231_REG_TEMP_MSB     0x11
+#define DS3231_REG_TEMP_LSB     0x12
+
+typedef enum
+{
+    DS3231_OK = 0,
+    DS3231_ERROR
+} DS3231_StatusTypeDef;
+
+typedef struct
+{
+    uint8_t seconds;   // 0 to 59
+    uint8_t minutes;   // 0 to 59
+    uint8_t hours;     // 0 to 23
+    uint8_t day;       // 1 to 7
+    uint8_t date;      // 1 to 31
+    uint8_t month;     // 1 to 12
+    uint8_t year;      // 0 to 99
+} DS3231_TimeTypeDef;
+
+/*
+ * Main API functions
+ */
+DS3231_StatusTypeDef DS3231_Init(I2C_HandleTypeDef *hi2c);
+
+DS3231_StatusTypeDef DS3231_SetTime(DS3231_TimeTypeDef *time);
+DS3231_StatusTypeDef DS3231_GetTime(DS3231_TimeTypeDef *time);
+
+DS3231_StatusTypeDef DS3231_SetDateTime(uint8_t sec,
+                                         uint8_t min,
+                                         uint8_t hour,
+                                         uint8_t day,
+                                         uint8_t date,
+                                         uint8_t month,
+                                         uint8_t year);
+
+DS3231_StatusTypeDef DS3231_GetTemperature(float *temperature);
+
+/*
+ * Helper conversion functions
+ */
+uint8_t DS3231_DecToBCD(uint8_t value);
+uint8_t DS3231_BCDToDec(uint8_t value);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* INC_DS3231_H_ */

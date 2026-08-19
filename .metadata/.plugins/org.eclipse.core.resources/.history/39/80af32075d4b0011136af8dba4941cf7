@@ -1,0 +1,13 @@
+/*
+ * app.h
+ *
+ *  Created on: May 8, 2026
+ *      Author: Asmita Milind Bagad
+ */
+
+#ifndef INC_APP_H_
+#define INC_APP_H_
+
+void start_module(void);
+
+#endif /* INC_APP_H_ */
